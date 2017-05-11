@@ -1,0 +1,41 @@
+// all this was done in the directory ~/ca/root
+
+//generate rsa root ca key, encrypt with aes cipher
+openssl genrsa -aes256 -out rootcakey.pem 4096
+password: thisisaprivatekey
+
+//generate root certificate
+openssl req -sha256 -new -x509 -days -key rootcakey.pem -out rootca.pem
+
+create serial crl and certindex files
+touch certindex
+echo 1000 > certserial
+echo 1000 > crlnumber
+
+//generate the intermediate rsa key
+openssl genrsa -aes256 -out interkey.pem 4096
+password: thisisanintermediate
+
+//in a sub directory we mirror the setup of the higher directory
+mkdir intermediate
+cd intermediate
+
+//generate the certificate request
+openssl req -new -sha256 -key interkey.pem -out inter.csr
+
+//sign with the root cert
+openssl ca -batch -config ../ca.conf -notext -in inter.csr -out inter.pem
+
+
+//move these into the intermediate directory
+
+//generate the cert chain file
+
+
+//generate the server cert
+mkdir servercerts
+openssl genrsa -aes256 -out atbarker.cmps122.ucsc.key.pem
+password: server
+openssl req -new -sha256 -key atbarker.cmps122.ucsc.key.pem -out atbarker.cmps122.ucsc.csr
+openssl ca -batch -config ca.conf -notext -in atbarker.cmps122.ucsc.csr -out atbarker.cmps122.ucsc.pem
+
